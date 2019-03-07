@@ -281,7 +281,7 @@ def dependence(space, model, i, j=None, sample_points=None,
                        n_samples=250, n_points=40, x_eval = None):
     """Calculate the dependence for dimensions `i` and `j` with
     respect to the objective value, as approximated by `model`.
-    If x_eval is set to "None" partial dependence will be calculated
+    If x_eval is set to "None" partial dependence will be calculated.
 
     The dependence plot shows how the value of the dimensions
     `i` and `j` influence the `model`.
@@ -362,16 +362,16 @@ def dependence(space, model, i, j=None, sample_points=None,
 
     if j is None:
         # We sample evenly instead of randomly. This is necessary when using
-        # categoricla values
+        # categorical values
         xi, xi_transformed = _evenly_sample(space.dimensions[i], n_points)
         yi = []
         for x_ in xi_transformed:
             rvs_ = np.array(sample_points)      # copy
             # We replace the values in the dimension that we want to keep fixed
             rvs_[:, dim_locs[i]:dim_locs[i + 1]] = x_ 
-            # In case of `x_eval=None` rvs conists of random samples
-            # calculating the mean of these samples is how we implement
-            # partial dependence
+            # In case of `x_eval=None` rvs conists of random samples.
+            # Calculating the mean of these samples is how partial dependence
+            # is implemented.
             yi.append(np.mean(model.predict(rvs_)))
 
         return xi, yi
@@ -395,17 +395,18 @@ def dependence(space, model, i, j=None, sample_points=None,
 
 def plot_objective(result, levels=10, n_points=40, n_samples=250, size=2,
                    zscale='linear', dimensions=None,usepartialdependence=True, pars='result', expected_minimum_samples = None):
-    """Pairwise partial dependence plot of the objective function.
+    """Pairwise dependence plot of the objective function.
 
-    The diagonal shows the partial dependence for dimension `i` with
+    The diagonal shows the dependence for dimension `i` with
     respect to the objective function. The off-diagonal shows the
-    partial dependence for dimensions `i` and `j` with
+    dependence for dimensions `i` and `j` with
     respect to the objective function. The objective function is
     approximated by `result.model.`
 
     Pairwise scatter plots of the points at which the objective
     function was directly evaluated are shown on the off-diagonal.
-    A red point indicates the found minimum.
+    A red point indicates per default the best observed minimum, but
+    this can be changed by changing argument ´pars´.
 
     Parameters
     ----------
@@ -455,8 +456,9 @@ def plot_objective(result, levels=10, n_points=40, n_samples=250, size=2,
     * `ax`: [`Axes`]:
         The matplotlib axes.
     """
-    # Here we define the parameters for which to plot the red dot (2d plot) and the red dotted line (1d plot).
-    # These same parameters will be used for evaluating the plots when not using partial dependence.
+    # Here we define the values for which to plot the red dot (2d plot) and the red dotted line (1d plot).
+    # These same values will be used for evaluating the plots when calculating dependence. (Unless partial
+    # dependence is to be used instead).
     space = result.space
     if isinstance(pars,str):
         if pars == 'result':
