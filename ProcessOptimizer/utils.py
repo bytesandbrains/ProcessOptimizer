@@ -333,7 +333,7 @@ def cook_estimator(base_estimator, space=None, **kwargs):
 
         base_estimator = GaussianProcessRegressor(
             kernel=cov_amplitude * other_kernel,
-            normalize_y=True, noise="gaussian",
+            normalize_y=True, noise=1e-8,
             n_restarts_optimizer=2)
     elif base_estimator == "RF":
         base_estimator = RandomForestRegressor(n_estimators=100,

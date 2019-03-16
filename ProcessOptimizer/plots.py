@@ -360,6 +360,7 @@ def dependence(space, model, i, j=None, sample_points=None,
         # categorical values
         xi, xi_transformed = _evenly_sample(space.dimensions[i], n_points)
         yi = []
+        zi = []
         for x_ in xi_transformed:
             rvs_ = np.array(sample_points)      # copy
             # We replace the values in the dimension that we want to keep fixed
@@ -367,9 +368,11 @@ def dependence(space, model, i, j=None, sample_points=None,
             # In case of `x_eval=None` rvs conists of random samples.
             # Calculating the mean of these samples is how partial dependence
             # is implemented.
-            yi.append(np.mean(model.predict(rvs_)))
+            funcvalue, stddev = model.predict(rvs_, return_std = True)
+            yi.append(np.mean(funcvalue))
+            zi.append(np.mean(stddev))
 
-        return xi, yi
+        return xi, yi, zi
 
     else:
         xi, xi_transformed = _evenly_sample(space.dimensions[j], n_points)
@@ -508,12 +511,14 @@ def plot_objective(result, levels=10, n_points=40, n_samples=250, size=2,
     for i in range(space.n_dims):
         for j in range(space.n_dims):
             if i == j:
-                xi, yi = dependence(space, result.models[-1], i,
+                xi, yi, zi = dependence(space, result.models[-1], i,
                                             j=None,
                                             sample_points=rvs_transformed,
                                             n_points=n_points,x_eval = x_eval)
 
                 ax[i, i].plot(xi, yi)
+                ax[i, i].plot(xi, (np.asarray(yi) - 1.96*np.asarray(zi)), color='r', alpha=0.5)
+                ax[i, i].plot(xi, (np.asarray(yi) + 1.96*np.asarray(zi)), color='r', alpha=0.5)
                 ax[i, i].axvline(minimum[i], linestyle="--", color="r", lw=1)
 
             # lower triangle

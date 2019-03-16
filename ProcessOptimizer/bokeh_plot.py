@@ -146,7 +146,7 @@ def get_plot_list(layout,result,active_list,n_points,x_eval):
                 break
             elif i==j: # Diagonal
                 # Passing j = None to dependence makes it calculate a diagonal plot
-                xi,yi = dependence(space, model, i, j=None, sample_points=None,
+                xi,yi,zi = dependence(space, model, i, j=None, sample_points=None,
                     n_samples=250, n_points=n_points, x_eval = dependence_eval)
                 if iscat[i]: # Categorical
                     x_range = space.dimensions[i].categories
@@ -159,8 +159,10 @@ def get_plot_list(layout,result,active_list,n_points,x_eval):
                 # So the location of the red line can be changed interactively
                 source_red = Span(location=red_vals[i], dimension='height', line_color='red', line_width=3) 
                 plot = figure(plot_height=200, plot_width=200, tools = '', x_range=x_range,y_range=[0,20])
-                source_line = ColumnDataSource(data=dict(x=xi, y=yi))
-                plot.line('x', 'y', source=source_line, line_width=3, line_alpha=0.6)
+                source_line_y = ColumnDataSource(data=dict(x=xi, y=yi))
+                source_line_z = ColumnDataSource(data=dict(x=xi, y=np.asarray(yi)+1.96*np.asarray(zi)))
+                plot.line('x', 'y', source=source_line_y, line_width=3, line_alpha=0.6)
+                plot.line('x', 'y', source=source_line_z, line_width=2, line_alpha=0.6)
                 # Add span i.e red line to plot
                 plot.add_layout(source_red)
                 #update max and minimum y _values
@@ -210,7 +212,7 @@ def get_plot_list(layout,result,active_list,n_points,x_eval):
                 source_samples = ColumnDataSource(data=dict(x = x_samples, y = y_samples))
                 source_red = ColumnDataSource(data=dict(x = [red_vals[j]], y = [red_vals[i]]))
                 # We plot samples as black circles and the evaluation marker as a  red circle
-                plot.circle(x='x',y='y',source=source_samples, size=10, color="black", alpha=0.5)
+                plot.circle(x='x',y='y',source=source_samples, size=5, color="black", alpha=0.3)
                 plot.circle(x='x',y='y',source=source_red, size=10, color="red", alpha=1)
             # We rotate the categorical labels slighty so they take up less space
             if iscat[j]:
@@ -351,7 +353,7 @@ def get_x_eval(result,active_list):
     elif eval_method == 'Sliders':
         x = get_x_eval_selectors_values()
     elif eval_method == 'Exp min' and not any(iscat):
-        x,_ = expected_minimum(result, n_random_starts=10, random_state=None)
+        x = expected_minimum(result, n_random_starts=10, random_state=None)
     elif eval_method == 'Exp min rand':
         x = expected_min_random_sampling(result.models[-1], result.space, np.min([10**len(result.x),10000]))
     else:
