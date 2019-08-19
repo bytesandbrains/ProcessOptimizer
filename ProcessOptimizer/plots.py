@@ -460,7 +460,7 @@ def plot_objective(result, levels=10, n_points=40, n_samples=250, size=2,
             # Using the best observed result
             x_vals = result.x
         elif pars == 'expected_minimum':
-            if not result.space.is_real:
+            if result.space.is_categorical:
                 # space is also categorical
                 raise ValueError('expected_minimum does not support categorical values')
             # Do a gradient based minimum search using scipys own minimizer
